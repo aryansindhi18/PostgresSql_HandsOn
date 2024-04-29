@@ -1,0 +1,264 @@
+      --sig-proxy                        Proxy received signals to the
+                                         process (default true)
+      --stop-signal string               Signal to stop the container
+      --stop-timeout int                 Timeout (in seconds) to stop a
+                                         container
+      --storage-opt list                 Storage driver options for the
+                                         container
+      --sysctl map                       Sysctl options (default map[])
+      --tmpfs list                       Mount a tmpfs directory
+  -t, --tty                              Allocate a pseudo-TTY
+      --ulimit ulimit                    Ulimit options (default [])
+  -u, --user string                      Username or UID (format:
+                                         <name|uid>[:<group|gid>])
+      --userns string                    User namespace to use
+      --uts string                       UTS namespace to use
+  -v, --volume list                      Bind mount a volume
+      --volume-driver string             Optional volume driver for the
+                                         container
+      --volumes-from list                Mount volumes from the specified
+                                         container(s)
+  -w, --workdir string                   Working directory inside the
+                                         container
+aryansindhi18@Aryans-MacBook-Air ~ % clear
+
+aryansindhi18@Aryans-MacBook-Air ~ % docker run -e POSTGRES_PASSWORD=mysecretpassword -d -p 5432:5432 postgres
+Unable to find image 'postgres:latest' locally
+latest: Pulling from library/postgres
+22d97f6a5d13: Pull complete 
+57095a025f36: Pull complete 
+545ff1a262fc: Pull complete 
+cccf13a4d744: Pull complete 
+0533baad3023: Pull complete 
+760b0afee078: Pull complete 
+8545ad4dd4d4: Pull complete 
+a41943a7475b: Pull complete 
+2a3aee5cff18: Pull complete 
+87cffb22d195: Pull complete 
+50b78e752f7f: Pull complete 
+b3e07fcc12d0: Pull complete 
+5884e2123361: Pull complete 
+6427dcf47359: Pull complete 
+Digest: sha256:4aea012537edfad80f98d870a36e6b90b4c09b27be7f4b4759d72db863baeebb
+Status: Downloaded newer image for postgres:latest
+1833d790bd6a925b7ae560293cb3349a376cde0bec276dcbe9e06348cd971cf6
+aryansindhi18@Aryans-MacBook-Air ~ % docker ps
+CONTAINER ID   IMAGE      COMMAND                  CREATED         STATUS         PORTS                    NAMES
+1833d790bd6a   postgres   "docker-entrypoint.s…"   6 seconds ago   Up 5 seconds   0.0.0.0:5432->5432/tcp   strange_snyder
+aryansindhi18@Aryans-MacBook-Air ~ % docker exec -it 1833d790bd6a /bin/bash
+root@1833d790bd6a:/# ls
+bin   dev			  etc	lib    mnt  proc  run	srv  tmp  var
+boot  docker-entrypoint-initdb.d  home	media  opt  root  sbin	sys  usr
+root@1833d790bd6a:/# psql
+psql: error: connection to server on socket "/var/run/postgresql/.s.PGSQL.5432" failed: FATAL:  role "root" does not exist
+root@1833d790bd6a:/# psql -h localhost -d postgres -U poatgres
+psql: error: connection to server at "localhost" (::1), port 5432 failed: FATAL:  role "poatgres" does not exist
+root@1833d790bd6a:/# psql -h localhost -d postgres -U postgres
+psql (16.2 (Debian 16.2-1.pgdg120+2))
+Type "help" for help.
+
+postgres=# select now()
+postgres-# select now();
+ERROR:  syntax error at or near "now"
+LINE 2: select now();
+               ^
+postgres=# SELECT now();
+              now              
+-------------------------------
+ 2024-04-26 12:19:43.567707+00
+(1 row)
+
+postgres=# CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE
+postgres=# Select * From users;
+ id | username | email | password | created_at 
+----+----------+-------+----------+------------
+(0 rows)
+
+postgres=# \dt
+         List of relations
+ Schema | Name  | Type  |  Owner   
+--------+-------+-------+----------
+ public | users | table | postgres
+(1 row)
+
+postgres=# Alter Tbale users
+postgres-# ;
+ERROR:  syntax error at or near "Tbale"
+LINE 1: Alter Tbale users
+              ^
+postgres=# Alter Table users Add nickname varchar(64)
+postgres-# ;
+ALTER TABLE
+postgres=# /dt
+postgres-# ;
+ERROR:  syntax error at or near "/"
+LINE 1: /dt
+        ^
+postgres=# \dt;
+         List of relations
+ Schema | Name  | Type  |  Owner   
+--------+-------+-------+----------
+ public | users | table | postgres
+(1 row)
+
+postgres=# Select * From users;
+ id | username | email | password | created_at | nickname 
+----+----------+-------+----------+------------+----------
+(0 rows)
+
+postgres=# INSERT INTO users (username, email, password)
+VALUES ('username_here', 'user@example.com', 'user_password');
+INSERT 0 1
+postgres=# Select * From users;
+ id |   username    |      email       |   password    |          created_at           | nickname 
+----+---------------+------------------+---------------+-------------------------------+----------
+  1 | username_here | user@example.com | user_password | 2024-04-26 12:41:32.999877+00 | 
+(1 row)
+
+postgres=# Update users set password='updated_pwd' where username='username_here';
+UPDATE 1
+postgres=# select * from users;
+ id |   username    |      email       |  password   |          created_at           | nickname 
+----+---------------+------------------+-------------+-------------------------------+----------
+  1 | username_here | user@example.com | updated_pwd | 2024-04-26 12:41:32.999877+00 | 
+(1 row)
+
+postgres=# Delete From users where id=89;
+DELETE 0
+postgres=# \dt;
+             List of relations
+ Schema |     Name      | Type  |  Owner   
+--------+---------------+-------+----------
+ public | users         | table | postgres
+ public | usersfromnode | table | postgres
+(2 rows)
+
+postgres=# select * from users;
+ id |   username    |       email       |   password    |          created_at           | nickname 
+----+---------------+-------------------+---------------+-------------------------------+----------
+  1 | username_here | user@example.com  | updated_pwd   | 2024-04-26 12:41:32.999877+00 | 
+  2 | username2     | user3@example.com | user_password | 2024-04-26 12:58:11.872533+00 | 
+(2 rows)
+
+postgres=# CREATE TABLE addresses (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL,
+    city VARCHAR(100) NOT NULL,
+    country VARCHAR(100) NOT NULL,
+    street VARCHAR(255) NOT NULL,
+    pincode VARCHAR(20),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+CREATE TABLE
+postgres=# select * From users;
+ id |   username    |       email       |   password    |          created_at           | nickname 
+----+---------------+-------------------+---------------+-------------------------------+----------
+  1 | username_here | user@example.com  | updated_pwd   | 2024-04-26 12:41:32.999877+00 | 
+  2 | username2     | user3@example.com | user_password | 2024-04-26 12:58:11.872533+00 | 
+(2 rows)
+
+postgres=# INSERT INTO addresses (user_id, city, country, street, pincode)
+VALUES (1, 'New York', 'USA', '123 Broadway St', '10001');
+INSERT 0 1
+postgres=# SELECT city, country, street, pincode
+FROM addresses
+WHERE user_id = 1;
+   city   | country |     street      | pincode 
+----------+---------+-----------------+---------
+ New York | USA     | 123 Broadway St | 10001
+(1 row)
+
+postgres=# BEGIN; -- Start transaction
+
+INSERT INTO users (username, email, password)
+VALUES ('john_doe', 'john_doe1@example.com', 'securepassword123');
+
+INSERT INTO addresses (user_id, city, country, street, pincode)
+VALUES (currval('users_id_seq'), 'New York', 'USA', '123 Broadway St', '10001');
+
+COMMIT;
+BEGIN
+INSERT 0 1
+INSERT 0 1
+COMMIT
+postgres=# select * From users;select * from addresses;
+ id |   username    |         email         |     password      |          created_at           | nickname 
+----+---------------+-----------------------+-------------------+-------------------------------+----------
+  1 | username_here | user@example.com      | updated_pwd       | 2024-04-26 12:41:32.999877+00 | 
+  2 | username2     | user3@example.com     | user_password     | 2024-04-26 12:58:11.872533+00 | 
+  3 | john_doe      | john_doe1@example.com | securepassword123 | 2024-04-26 15:04:28.727206+00 | 
+(3 rows)
+
+ id | user_id |   city   | country |     street      | pincode |          created_at           
+----+---------+----------+---------+-----------------+---------+-------------------------------
+  1 |       1 | New York | USA     | 123 Broadway St | 10001   | 2024-04-26 15:03:45.584025+00
+  2 |       3 | New York | USA     | 123 Broadway St | 10001   | 2024-04-26 15:04:28.727206+00
+(2 rows)
+
+postgres=# SELECT users.id, users.username, users.email, addresses.city, addresses.country, addresses.street, addresses.pincode
+FROM users
+JOIN addresses ON users.id = addresses.user_id;
+ id |   username    |         email         |   city   | country |     street      | pincode 
+----+---------------+-----------------------+----------+---------+-----------------+---------
+  1 | username_here | user@example.com      | New York | USA     | 123 Broadway St | 10001
+  3 | john_doe      | john_doe1@example.com | New York | USA     | 123 Broadway St | 10001
+(2 rows)
+
+postgres=# //Inner Join
+postgres-# SELECT users.username, addresses.city, addresses.country, addresses.street, addresses.pincode
+FROM users
+INNER JOIN addresses ON users.id = addresses.user_id;
+ERROR:  syntax error at or near "//"
+LINE 1: //Inner Join
+        ^
+postgres=# --Inner Join
+postgres=# SELECT users.username, addresses.city, addresses.country, addresses.street, addresses.pincode
+FROM users
+INNER JOIN addresses ON users.id = addresses.user_id;
+   username    |   city   | country |     street      | pincode 
+---------------+----------+---------+-----------------+---------
+ username_here | New York | USA     | 123 Broadway St | 10001
+ john_doe      | New York | USA     | 123 Broadway St | 10001
+(2 rows)
+
+postgres=# --Left Join
+postgres=# SELECT users.username, addresses.city, addresses.country, addresses.street, addresses.pincode
+FROM users
+LEFT JOIN addresses ON users.id = addresses.user_id;
+   username    |   city   | country |     street      | pincode 
+---------------+----------+---------+-----------------+---------
+ username_here | New York | USA     | 123 Broadway St | 10001
+ john_doe      | New York | USA     | 123 Broadway St | 10001
+ username2     |          |         |                 | 
+(3 rows)
+
+postgres=# --Right Join
+postgres=# SELECT users.username, addresses.city, addresses.country, addresses.street, addresses.pincode
+FROM users
+RIGHT JOIN addresses ON users.id = addresses.user_id;
+   username    |   city   | country |     street      | pincode 
+---------------+----------+---------+-----------------+---------
+ username_here | New York | USA     | 123 Broadway St | 10001
+ john_doe      | New York | USA     | 123 Broadway St | 10001
+(2 rows)
+
+postgres=# --full join
+postgres=# SELECT users.username, addresses.city, addresses.country, addresses.street, addresses.pincode
+FROM users
+FULL JOIN addresses ON users.id = addresses.user_id;
+   username    |   city   | country |     street      | pincode 
+---------------+----------+---------+-----------------+---------
+ username_here | New York | USA     | 123 Broadway St | 10001
+ john_doe      | New York | USA     | 123 Broadway St | 10001
+ username2     |          |         |                 | 
+(3 rows)
+
+postgres=# 
